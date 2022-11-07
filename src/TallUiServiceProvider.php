@@ -2,24 +2,26 @@
 
 namespace DennisVanDalen\TallUi;
 
-use DennisVanDalen\TallUi\Commands\TallUiCommand;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\View\Compilers\BladeCompiler;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class TallUiServiceProvider extends PackageServiceProvider
+class TallUiServiceProvider extends ServiceProvider
 {
-    public function configurePackage(Package $package): void
+    public function boot(): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
-        $package
-            ->name('tall-ui')
-            ->hasConfigFile()
-            ->hasViews()
-            ->hasMigration('create_tall-ui_table')
-            ->hasCommand(TallUiCommand::class);
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'ui');
+
+        $this->publishes([
+            __DIR__ . '/../resources/views' => resource_path('views/vendor/ui'),
+        ]);
+
+        $this->callAfterResolving(BladeCompiler::class, function () {
+            Blade::component('ui::components.container', 'ui-container');
+            Blade::component('ui::components.h2-title', 'ui-h2-title');
+        });
+
     }
 }
